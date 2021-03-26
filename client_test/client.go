@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-03-25 13:43:56
- * @LastEditTime: 2021-03-26 19:11:17
+ * @LastEditTime: 2021-03-26 19:42:50
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /socker/client_test/client.go
@@ -17,9 +17,11 @@ import (
 
 func main() {
 	c := socker.DefaultTCPClient()
+	defer c.Close()
+
 	c.Start()
 	wg := sync.WaitGroup{}
-	for i := 0; i < 200; i++ {
+	for i := 0; i < 500; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -33,5 +35,4 @@ func main() {
 		}()
 	}
 	wg.Wait()
-	c.Close()
 }

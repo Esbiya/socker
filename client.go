@@ -21,19 +21,18 @@ type (
 		Body chan interface{}
 	}
 	Config struct {
-		Mode           string
-		Addr           string
-		InitCap        int
-		MaxIdle        int
-		MaxCap         int
-		ConnectTimeout time.Duration
+		Mode        string
+		Addr        string
+		InitCap     int
+		MaxIdle     int
+		MaxCap      int
+		IdleTimeout time.Duration
 	}
 	Client struct {
-		gpool          *ants.Pool
-		connectPool    pool.Pool
-		writeChan      chan []byte
-		close          chan struct{}
-		connectTimeout time.Duration
+		gpool       *ants.Pool
+		connectPool pool.Pool
+		writeChan   chan []byte
+		close       chan struct{}
 	}
 )
 
@@ -54,15 +53,14 @@ func (c *Callback) Close() {
 
 func NewClient(cfg *Config) (*Client, error) {
 	retMap = &sync.Map{}
-	factory := func() (interface{}, error) { return net.Dial(cfg.Mode, cfg.Addr) }
-	close := func(v interface{}) error { return v.(net.Conn).Close() }
 	poolConfig := &pool.Config{
-		Factory:     factory,
-		Close:       close,
-		InitialCap:  cfg.InitCap,        // 资源池初始连接数
-		MaxIdle:     cfg.MaxIdle,        // 最大空闲连接数
-		MaxCap:      cfg.MaxCap,         // 最大并发连接数
-		IdleTimeout: cfg.ConnectTimeout, // 连接最大空闲时间，超过该时间的连接 将会关闭，可避免空闲时连接EOF，自动失效的问题
+		Factory:     func() (interface{}, error) { return net.Dial(cfg.Mode, cfg.Addr) },
+		Close:       func(v interface{}) error { return v.(net.Conn).Close() },
+		Ping:        func(v interface{}) error { _, err := v.(net.Conn).Read(make([]byte, 0)); return err },
+		InitialCap:  cfg.InitCap,     // 资源池初始连接数
+		MaxIdle:     cfg.MaxIdle,     // 最大空闲连接数
+		MaxCap:      cfg.MaxCap,      // 最大并发连接数
+		IdleTimeout: cfg.IdleTimeout, // 连接最大空闲时间，超过该时间的连接将会关闭，可避免空闲时连接EOF，自动失效的问题
 	}
 	connectPool, err := pool.NewChannelPool(poolConfig)
 	if err != nil {
@@ -70,35 +68,34 @@ func NewClient(cfg *Config) (*Client, error) {
 	}
 	gpool, err := ants.NewPool(1 << 18)
 	c := &Client{
-		gpool:          gpool,
-		connectPool:    connectPool,
-		writeChan:      make(chan []byte),
-		close:          make(chan struct{}),
-		connectTimeout: cfg.ConnectTimeout,
+		gpool:       gpool,
+		connectPool: connectPool,
+		writeChan:   make(chan []byte),
+		close:       make(chan struct{}),
 	}
 	return c, err
 }
 
 func DefaultUDSClient() *Client {
 	c, _ := NewClient(&Config{
-		Mode:           UDS,
-		Addr:           DefaultUDSAddr,
-		InitCap:        100,
-		MaxIdle:        100,
-		MaxCap:         1 << 18,
-		ConnectTimeout: 5 * time.Second,
+		Mode:        UDS,
+		Addr:        DefaultUDSAddr,
+		InitCap:     100,
+		MaxIdle:     100,
+		MaxCap:      1 << 18,
+		IdleTimeout: 5 * time.Second,
 	})
 	return c
 }
 
 func DefaultTCPClient() *Client {
 	c, _ := NewClient(&Config{
-		Mode:           TCP,
-		Addr:           DefaultTCPAddr,
-		InitCap:        100,
-		MaxIdle:        100,
-		MaxCap:         1 << 18,
-		ConnectTimeout: 5 * time.Second,
+		Mode:        TCP,
+		Addr:        DefaultTCPAddr,
+		InitCap:     100,
+		MaxIdle:     100,
+		MaxCap:      1 << 18,
+		IdleTimeout: 5 * time.Second,
 	})
 	return c
 }
@@ -130,7 +127,6 @@ func (c *Client) read(conn net.Conn) {
 		if err != nil {
 			loguru.Error(err)
 		}
-		loguru.Debug(msg.Stringify())
 		if v, ok := retMap.Load(msg.Sign); ok {
 			v.(chan interface{}) <- msg.Body
 		}
@@ -160,10 +156,7 @@ func (c *Client) Send(api string, context interface{}) *Callback {
 	sign := GenUUIDStr()
 	message := NewMessage(api, sign, context)
 
-	b := MergeBytes(IntToBytes(message.length), message.bytes)
-	loguru.Debug(string(b))
-
-	c.writeChan <- b
+	c.writeChan <- MergeBytes(IntToBytes(message.length), message.bytes)
 
 	out := make(chan interface{})
 	retMap.Store(sign, out)

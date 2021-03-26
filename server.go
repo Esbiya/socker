@@ -70,14 +70,6 @@ func (u *Server) OnInitComplete(srv gnet.Server) (action gnet.Action) {
 func (u *Server) OnOpened(c gnet.Conn) (out []byte, action gnet.Action) {
 	c.SetContext(c)
 	atomic.AddInt32(&u.connected, 1)
-	// msg := NewMessage("client.init", "client.init.sign", "hello world")
-	// out = MergeBytes(IntToBytes(msg.length), msg.bytes)
-	// if c.LocalAddr() == nil {
-	// 	panic("nil local addr")
-	// }
-	// if c.RemoteAddr() == nil {
-	// 	panic("nil local addr")
-	// }
 	return
 }
 
@@ -151,7 +143,7 @@ func (u *Server) version() {
 	fmt.Println(loguru.Fuchsia(`   _________  _____/ /_____  _____`))
 	fmt.Println(loguru.Fuchsia(`  / ___/ __ \/ ___/ //_/ _ \/ ___/`))
 	fmt.Println(loguru.Fuchsia(` (__  ) /_/ / /__/ ,< /  __/ /`))
-	fmt.Println(loguru.Fuchsia(fmt.Sprintf(`/____/\____/\___/_/|_|\___/_/       socker v0.0.1 %s/%s`, runtime.GOOS, runtime.GOARCH)))
+	fmt.Println(loguru.Fuchsia(fmt.Sprintf(`/____/\____/\___/_/|_|\___/_/       socker v0.0.2 %s/%s`, runtime.GOOS, runtime.GOARCH)))
 }
 
 func (u *Server) Run() {

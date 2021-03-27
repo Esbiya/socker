@@ -1,11 +1,3 @@
-/*
- * @Author: your name
- * @Date: 2021-03-25 13:43:56
- * @LastEditTime: 2021-03-27 10:04:02
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /socker/client_test/client.go
- */
 package main
 
 import (
@@ -29,7 +21,7 @@ func main() {
 
 	c.Start()
 	wg := sync.WaitGroup{}
-	for i := 0; i < 500; i++ {
+	for i := 0; i < 50; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -39,7 +31,7 @@ func main() {
 				loguru.Debug(b)
 			}).Then(func(b interface{}) {
 				loguru.Debug(b)
-			}).Close()
+			})
 		}()
 	}
 	wg.Wait()

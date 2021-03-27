@@ -29,6 +29,7 @@ type (
 		IdleTimeout time.Duration
 	}
 	Client struct {
+		sync.Mutex
 		gpool       *ants.Pool
 		connectPool pool.Pool
 		writeChan   chan []byte
@@ -101,12 +102,12 @@ func DefaultTCPClient() *Client {
 }
 
 func (c *Client) read(conn net.Conn) {
-	defer c.connectPool.Put(conn)
 	for {
 		// 读取消息长度
 		s := make([]byte, 4)
 		_, err := conn.Read(s)
 		if err == io.EOF {
+			c.connectPool.Close(conn)
 			return
 		}
 		if err != nil {
@@ -129,9 +130,12 @@ func (c *Client) read(conn net.Conn) {
 		}
 		if v, ok := retMap.Load(msg.Sign); ok {
 			v.(chan interface{}) <- msg.Body
-		}
-		if msg.Done {
-			return
+			if msg.Done {
+				close(v.(chan interface{}))
+				retMap.Delete(msg.Sign)
+				c.connectPool.Put(conn)
+				return
+			}
 		}
 	}
 }

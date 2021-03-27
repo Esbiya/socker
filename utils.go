@@ -1,11 +1,3 @@
-/*
- * @Author: your name
- * @Date: 2021-03-25 13:41:11
- * @LastEditTime: 2021-03-26 15:51:26
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /socker/utils.go
- */
 package socker
 
 import (

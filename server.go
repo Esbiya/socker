@@ -126,10 +126,19 @@ func (u *Server) React(frame []byte, c gnet.Conn) (out []byte, action gnet.Actio
 			_ = u.pool.Submit(func() {
 				next := u.router.Get(message.Api)
 				var out interface{}
+				cnt := 0
 				for next != nil {
 					out, next = next(message.ToData())
 					message.reset(false, out)
 					loguru.Debug("reply   message - length: %d, body: %s", message.bodyLength, message.BodyStringify())
+					_ = c.AsyncWrite(message.out())
+					cnt += 1
+				}
+				if cnt > 0 {
+					message.reset(true, []byte{})
+					_ = c.AsyncWrite(message.out())
+				} else {
+					message.reset(true, "unknown api")
 					_ = c.AsyncWrite(message.out())
 				}
 			})

@@ -7,13 +7,6 @@ import (
 	"github.com/Esbiya/socker"
 )
 
-func testLogin(qr chan string) bool {
-	<-time.After(1 * time.Second)
-	qr <- "xxx"
-	<-time.After(1 * time.Second)
-	return true
-}
-
 func main() {
 	server := socker.DefaultTCPServer()
 	server.Router().Register("session.login", func(msg socker.Data) (out interface{}, next socker.Handler) {

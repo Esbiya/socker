@@ -2,6 +2,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/Esbiya/gnet v1.4.1 h1:7rqLOGdmZ5YQtrI21nQUg9AYbEMo5jhenhLRqi630qE=
 github.com/Esbiya/loguru v0.2.5 h1:BCrWYq+mWIpB1a1HRmr2+ai4wKlVWp4+rIRVLqS9fv8=
 github.com/Esbiya/loguru v0.2.5/go.mod h1:cxj+p3URFhUDSjm3YTYuCQuestEuIkebKjl7obztok4=
+github.com/Esbiya/loguru v0.2.6 h1:2c1ejGM0KkaQkQDokbL+jL/H2wTLZLp6EtPzWplFFOM=
+github.com/Esbiya/loguru v0.2.6/go.mod h1:cxj+p3URFhUDSjm3YTYuCQuestEuIkebKjl7obztok4=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fatih/pool v1.0.0 h1:etlANzyBmYJsWD2bVOheUhqcK6KDHZMjnmUUgtYtez8=
